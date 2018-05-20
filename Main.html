@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>To-Do</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-sm bg-secondary navbar-dark">
+        <!-- Brand -->
+        <a class="navbar-brand" href="#">To-Do</a>
+        <!-- Toggler/collapsibe Button -->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="collapsibleNavbar">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item navbar-right active">
+                    <a class="nav-link" href="#">Tasks</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+	<!-- Navbar section ends -->
+	<!-- Angular module -->
+    <div ng-app="ToDoApp" ng-controller="ListControl" class="w3-card-2 w3-margin">
+	    <!-- Defining header of card -->
+        <header class="w3-container w3-light-grey w3-padding-16">
+            <h3>To-Do List</h3>
+            <h4>Count: {{countElements}}</h4>
+        </header>
+		<!-- List of Items -->
+        <ul class="w3-ul">
+		    <!-- Entering the item as well as its creation time and a removal button -->
+            <li ng-repeat="item in List" class="w3-padding-16">
+                {{item.Name}}&nbsp;<span class="badge badge-light">Time created- {{DateList[$index]}}</span><span ng-click="removeItem($index)" style="cursor:pointer;" class="w3-right w3-margin-right">×</span>
+            </li>
+        </ul>
+		<!-- List of Items ends -->
+		<!-- Input field and other buttons -->
+        <div class="w3-container w3-light-grey w3-padding-16">
+		    <!-- Using W3.CSS for styling -->
+            <div class="w3-row w3-margin-top">
+                <div class="w3-col s10">
+				    <!-- Entering the item -->
+                    <input type="text" name="item" placeholder="Add To-Do" ng-model="ToDoItem" class="w3-input w3-border w3-padding">
+                </div>
+                <div class="w3-col s2">
+				    <!-- Add button invoking function -->
+                    <button ng-click="addItem()" class="w3-btn w3-padding w3-green">Add</button>
+                </div>
+            </div>
+            <br/>
+			<!-- Sort button invoking function -->
+            <button type="button" ng-click="SortItem()" class="w3-btn w3-padding w3-blue" data-toggle="modal" data-target="#myModal">Sort by Time</button>
+            <br/>
+            <br/>
+			<!-- Error field depicting error -->
+            <p class="w3-text-red">{{error}}</p>
+        </div>
+		<!-- Input field and other buttons section ends -->
+        <!-- The Modal -->
+        <div class="modal fade" id="myModal">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">Sorted!</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+					<!-- Modal Header ends -->
+                </div>
+            </div>
+        </div>
+		<!--Modal Ends -->
+    </div>
+	<!-- Angular module ends -->
+    <script>
+        var app = angular.module('ToDoApp', []);//Defining Angular module
+        app.controller('ListControl', function($scope, $filter) {//Defining controller
+            $scope.List = [];//List to store the added items
+            $scope.DateList = [];//Array to store
+            $scope.error = '';//Array to store error info
+            $scope.countElements = 0;//Array to store number elemets in the To-do in real time
+            $scope.today = new Date();//Date object
+            $scope.addItem = function() {//Function to add items
+                if (!$scope.ToDoItem) {//Checking if the user didn't enter anything
+                    $scope.error = 'Please enter something!';
+                    return;
+                }
+                var sourceWords = [],//Array to store entered item's words
+                    targetWords = [],//Array to store words of To-do items already entered
+                    info = [];//Array to store entire list
+                var i, j, k, p, q, count = 0,//count used to count the number of matched words
+                    flag = 0,//flag variables to indicate if the conditions are met or not
+                    flag1 = 0,
+                    flag2 = 0;
+                sourceWords = $scope.ToDoItem.split(' ');//splitting up the source string into words
+                for (i = 0; i < $scope.List.length; i++) {//Traversing the list of To-do items
+                    info = $scope.List;
+                    targetWords = info[i].Name.split(' ');//splitting up the seperate items into words
+                    for (j = 0; j < sourceWords.length; j++) {//Traversing the list of words in source string (i.e., the string entered by user)
+                        for (k = 0; k < targetWords.length; k++) {//Traversing list of words in target item (i.e., the string already present in To-do)
+                            var m = targetWords[k].length;//Length of the kth target item's word
+                            var n = sourceWords[j].length;//Length of the kth target item's word
+                            var wordsList = new Array(m + 1);//creating a 2-D array to store characters, using Dynamic Programming procedure
+                            for (p = 0; p < m + 1; p++) {
+                                wordsList[p] = new Array(n + 1);
+                            }
+                            var count1 = 0;//count1 to store length of longest common substring among 2 words
+                            var SW = sourceWords[j].split('');//splitting the source word in characters
+                            var TW = targetWords[k].split('');//splitting the target word in characters
+                            for (p = 0; p < m + 1; p++) {//Making character matrix
+                                for (q = 0; q < n + 1; q++) {
+                                    if (p == 0 || q == 0) {//For simplicity,initialising leftmost column nd topmost row =0
+                                        wordsList[p][q] = 0;
+                                    } else if (TW[p - 1] == SW[q - 1]) {//If the character matches from target and source string
+                                        wordsList[p][q] = wordsList[p - 1][q - 1] + 1;//Calculating length of longest suffix substring of a string, from a given set of prefixes. This method works as longest substring of a string is also a longest suffix substring, for a given set of prefixes, which gets already included
+                                        count1 = Math.max(count1, wordsList[p][q]);//Assigning new value to count1, based on length of longest suffix substring
+                                    } else
+                                        wordsList[p][q] = 0;
+                                }
+                            }
+                            wordsList = [];//Resetting the wordsList array
+                            if (count1 > (sourceWords[j].length) / 2) {//If 50% of source word matches with target then a match
+                                count++;
+                                break;
+                            }
+                            if (count > (sourceWords.length) / 2) {//If 50% of source words matches with target words then duplicate, flag1=1 used to indicate it
+                                flag1 = 1;
+                                break;
+                            }
+                            count1 = 0;
+                        }
+                        if (count > (sourceWords.length) / 2) {//If 50% of source words matches with target words then duplicate, flag1=1 used to indicate it
+                            flag1 = 1;
+                        }
+                        if (flag1 == 1) {
+                            flag2 = 1;
+                            break;
+                        }
+                    }
+                    if (count > (sourceWords.length) / 2) {//If 50% of source words matches with target words then duplicate, flag2=1 used to indicate it
+                        flag2 = 1;
+                    }
+                    if (flag2 == 1) {//If flag2 = 1, it means error of duplication, to indicate it, flag = 1 is used
+                        flag = 1;
+                        break;
+                    }
+                    count = 0;//Reinitialising count for next iteration
+                }
+                if (flag == 0) {//If no duplication
+                    $scope.error = '';//Assigning no value to error, as no error
+                    $scope.List.push({//Pushing item and its creation time in milliseconds as objects in List
+                        Name: $scope.ToDoItem,
+                        sortOrder: new Date().getTime()
+                    });
+                    $scope.DateList.push(new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds() + ", " + new Date().getDate() + "/" + new Date().getMonth() + "/" + new Date().getFullYear());//Pushing date and time to be displayed with item
+                    $scope.countElements++;//Increasing count of items
+                } else {
+                    $scope.error = 'All or most of the content of this To-do already exists in the list';//indicating error if duplicate string
+                    flag = 0;
+                }
+            }
+            $scope.removeItem = function(pos) {//Function to remove items
+                $scope.error = '';
+                $scope.List.splice(pos, 1);
+                $scope.DateList.splice(pos, 1);//Splicing the list to remove elements and prevent holes
+                $scope.countElements--;//Decreasing element count
+            }
+            $scope.SortItem = function() {//Function to sort items
+                $scope.List = $filter('orderBy')($scope.List, 'sortOrder');//Ordering w.r.t. sortOrder
+            }
+        });
+    </script>
+</body>
+
+</html>
